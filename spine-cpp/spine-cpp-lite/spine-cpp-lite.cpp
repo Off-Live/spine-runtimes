@@ -2472,6 +2472,73 @@ spine_bounding_box_attachment spine_attachment_cast_to_bounding_box_attachment(s
 	return nullptr;
 }
 
+spine_mesh_attachment spine_attachment_cast_to_mesh_attachment(spine_attachment attachment) {
+	if (attachment == nullptr) return nullptr;
+	Attachment *_attachment = (Attachment *) attachment;
+	if (_attachment->getRTTI().isExactly(MeshAttachment::rtti)) {
+		MeshAttachment *mesh = static_cast<MeshAttachment *>(_attachment);
+		return (spine_mesh_attachment) mesh;
+	}
+	return nullptr;
+}
+
+spine_region_attachment spine_attachment_cast_to_region_attachment(spine_attachment attachment) {
+	if (attachment == nullptr) return nullptr;
+	Attachment *_attachment = (Attachment *) attachment;
+	if (_attachment->getRTTI().isExactly(RegionAttachment::rtti)) {
+		RegionAttachment *region = static_cast<RegionAttachment *>(_attachment);
+		return (spine_region_attachment) region;
+	}
+	return nullptr;
+}
+
+void spine_mesh_attachment_compute_world_vertices(spine_mesh_attachment attachment, spine_slot slot, float *worldVertices) {
+	if (attachment == nullptr || slot == nullptr) return;
+	MeshAttachment *_mesh = (MeshAttachment *) attachment;
+	Slot *_slot = (Slot *) slot;
+	size_t count = _mesh->getWorldVerticesLength();
+	_mesh->computeWorldVertices(*_slot, 0, count, worldVertices, 0, 2);
+}
+
+int32_t spine_mesh_attachment_get_world_vertices_length(spine_mesh_attachment attachment) {
+	if (attachment == nullptr) return 0;
+	MeshAttachment *_mesh = (MeshAttachment *) attachment;
+	return (int32_t) _mesh->getWorldVerticesLength();
+}
+
+int32_t spine_texture_region_get_page_index(spine_texture_region region, spine_atlas atlas) {
+	if (region == nullptr || atlas == nullptr) return 0;
+	AtlasRegion *_region = (AtlasRegion *) region;
+	Atlas *_atlas = (Atlas *) atlas;
+	AtlasPage *targetPage = _region->page;
+	if (targetPage == nullptr) return 0;
+	Vector<AtlasPage *> &pages = _atlas->getPages();
+	for (size_t i = 0; i < pages.size(); i++) {
+		if (pages[i] == targetPage) return (int32_t) i;
+	}
+	return 0;
+}
+
+void spine_region_attachment_compute_world_vertices_ext(spine_region_attachment attachment, spine_slot slot, float *worldVertices) {
+	if (attachment == nullptr || slot == nullptr) return;
+	RegionAttachment *_region = (RegionAttachment *) attachment;
+	Slot *_slot = (Slot *) slot;
+	_region->computeWorldVertices(*_slot, worldVertices, 0);
+}
+
+spine_vertex_attachment spine_attachment_cast_to_vertex_attachment(spine_attachment attachment) {
+	if (attachment == nullptr) return nullptr;
+	Attachment *_attachment = (Attachment *) attachment;
+	// MeshAttachment, BoundingBoxAttachment, PathAttachment, ClippingAttachment 모두 VertexAttachment 상속
+	if (_attachment->getRTTI().isExactly(MeshAttachment::rtti) ||
+		_attachment->getRTTI().isExactly(BoundingBoxAttachment::rtti) ||
+		_attachment->getRTTI().isExactly(PathAttachment::rtti) ||
+		_attachment->getRTTI().isExactly(ClippingAttachment::rtti)) {
+		return (spine_vertex_attachment) attachment;
+	}
+	return nullptr;
+}
+
 void spine_attachment_dispose(spine_attachment attachment) {
 	if (attachment == nullptr) return;
 	Attachment *_attachment = (Attachment *) attachment;

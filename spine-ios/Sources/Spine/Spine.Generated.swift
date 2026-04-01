@@ -1384,6 +1384,15 @@ public final class RegionAttachment: NSObject {
         spine_region_attachment_set_color(wrappee, r, g, b, a)
     }
 
+    /// 현재 슬롯의 월드 버텍스를 계산하여 반환 (x0,y0, x1,y1, x2,y2, x3,y3 — 4 vertices)
+    public func computeWorldVertices(slot: Slot) -> [Float] {
+        var buf = [Float](repeating: 0, count: 8)
+        buf.withUnsafeMutableBufferPointer { ptr in
+            spine_region_attachment_compute_world_vertices_ext(wrappee, slot.wrappee, ptr.baseAddress!)
+        }
+        return buf
+    }
+
 }
 
 @objc(SpineVertexAttachment)
@@ -1667,6 +1676,21 @@ public final class MeshAttachment: NSObject {
 
     public func setColor(r: Float, g: Float, b: Float, a: Float) {
         spine_mesh_attachment_set_color(wrappee, r, g, b, a)
+    }
+
+    public var worldVerticesLength: Int32 {
+        return spine_mesh_attachment_get_world_vertices_length(wrappee)
+    }
+
+    /// 현재 슬롯의 월드 버텍스를 계산하여 반환 (x0,y0, x1,y1, ... 순서)
+    public func computeWorldVertices(slot: Slot) -> [Float] {
+        let count = Int(worldVerticesLength)
+        guard count > 0 else { return [] }
+        var buf = [Float](repeating: 0, count: count)
+        buf.withUnsafeMutableBufferPointer { ptr in
+            spine_mesh_attachment_compute_world_vertices(wrappee, slot.wrappee, ptr.baseAddress!)
+        }
+        return buf
     }
 
 }
@@ -2117,6 +2141,11 @@ public final class TextureRegion: NSObject {
         set {
             spine_texture_region_set_texture(wrappee, newValue)
         }
+    }
+
+    /// atlas 내에서 이 TextureRegion이 속한 페이지 인덱스를 반환
+    public func pageIndex(in atlas: Atlas) -> Int {
+        return Int(spine_texture_region_get_page_index(wrappee, atlas.wrappee))
     }
 
     public var u: Float {
@@ -2922,6 +2951,21 @@ public final class Attachment: NSObject {
     @discardableResult
     public func castToBoundingBoxAttachment() -> BoundingBoxAttachment? {
         return spine_attachment_cast_to_bounding_box_attachment(wrappee).flatMap { .init($0) }
+    }
+
+    @discardableResult
+    public func castToMeshAttachment() -> MeshAttachment? {
+        return spine_attachment_cast_to_mesh_attachment(wrappee).flatMap { .init($0) }
+    }
+
+    @discardableResult
+    public func castToRegionAttachment() -> RegionAttachment? {
+        return spine_attachment_cast_to_region_attachment(wrappee).flatMap { .init($0) }
+    }
+
+    @discardableResult
+    public func castToVertexAttachment() -> VertexAttachment? {
+        return spine_attachment_cast_to_vertex_attachment(wrappee).flatMap { .init($0) }
     }
 
     public func dispose() {
