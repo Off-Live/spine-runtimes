@@ -2954,6 +2954,11 @@ public final class Attachment: NSObject {
     }
 
     @discardableResult
+    public func castToClippingAttachment() -> ClippingAttachment? {
+        return spine_attachment_cast_to_clipping_attachment(wrappee).flatMap { .init($0) }
+    }
+
+    @discardableResult
     public func castToMeshAttachment() -> MeshAttachment? {
         return spine_attachment_cast_to_mesh_attachment(wrappee).flatMap { .init($0) }
     }

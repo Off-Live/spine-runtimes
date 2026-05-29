@@ -2472,6 +2472,16 @@ spine_bounding_box_attachment spine_attachment_cast_to_bounding_box_attachment(s
 	return nullptr;
 }
 
+spine_clipping_attachment spine_attachment_cast_to_clipping_attachment(spine_attachment attachment) {
+	if (attachment == nullptr) return nullptr;
+	Attachment *_attachment = (Attachment *) attachment;
+	if (_attachment->getRTTI().isExactly(ClippingAttachment::rtti)) {
+		ClippingAttachment *clipping = static_cast<ClippingAttachment *>(_attachment);
+		return (spine_clipping_attachment) clipping;
+	}
+	return nullptr;
+}
+
 spine_mesh_attachment spine_attachment_cast_to_mesh_attachment(spine_attachment attachment) {
 	if (attachment == nullptr) return nullptr;
 	Attachment *_attachment = (Attachment *) attachment;
