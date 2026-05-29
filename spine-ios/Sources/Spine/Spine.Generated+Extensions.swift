@@ -277,6 +277,20 @@ internal extension RenderCommand {
     }
 }
 
+public extension TextureRegion {
+
+    /// spine-ios는 GPU 텍스처 대신 atlas page 인덱스를 rendererObject(texture 포인터)로
+    /// 인코딩한다. 이는 렌더러가 `RenderCommand.atlasPage`를 계산하는 방식과 동일하다
+    /// (spine_render_command_get_atlas_page = (intptr_t)command->texture).
+    ///
+    /// page 0은 null 포인터로 표현되는데, `texture` 프로퍼티는 이를 강제 언래핑하여
+    /// 크래시하므로, 여기서 null-safe 하게 page 인덱스를 반환한다.
+    var rendererObjectPageIndex: Int {
+        let raw: UnsafeMutableRawPointer? = spine_texture_region_get_texture(wrappee)
+        return Int(bitPattern: raw)
+    }
+}
+
 public extension Skin {
     
     /// Constructs a new empty ``Skin`` using the given `name`. Skins constructed this way must be manually disposed via the `dispose` method
